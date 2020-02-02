@@ -14,6 +14,8 @@ var log = require('./libs/log')(module);
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
+var mongoose = require('mongoose');
+
 var app = express();
 
 // view engine setup
@@ -45,17 +47,16 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+db = require('./libs/mongoose');
 
-
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
-
+app.set('port', process.env.port || config.get('port'));
 var server = http.createServer(app);
-
-server.listen(port);
+server.listen(app.get('port'));
 server.on('error', onError);
 server.on('listening', onListening);
+/*
 
+*/
 function normalizePort(val) {
   var port = parseInt(val, 10);
 
@@ -105,7 +106,6 @@ function onError(error) {
  */
 
 function onListening() {
-  console.log('=========');
   log.info('Express server listening on port ' + config.get("port"));
   var addr = server.address();
   var bind = typeof addr === 'string'
