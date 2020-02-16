@@ -4,114 +4,56 @@ var express = require('express');
 var http = require('http');
 
 var createError = require('http-errors');
-
+var errorHandler = require('errorhandler');
 var config = require('./config');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var log = require('./libs/log')(module);
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var router = express.Router();
 
 var mongoose = require('mongoose');
+var db = require('./libs/mongoose');
 
 var app = express();
 
-// view engine setup
+// engine setup configure
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
-
-db = require('./libs/mongoose');
-
+app.use(router);
 app.set('port', process.env.port || config.get('port'));
-var server = http.createServer(app);
-server.listen(app.get('port'));
-server.on('error', onError);
-server.on('listening', onListening);
-/*
 
-*/
-function normalizePort(val) {
-  var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
+require('./routes')(app);
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
 
-  return false;
-}
+if (app.get('env') === 'development') {
+  app.use(logger(':method :url :status :response-time ms'));
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+  // db = mongoose.connect('mongodb://localhost/nodepad-development');
+};
 
-/**
- * Event listener for HTTP server "error" event.
- */
+if (app.get('env') === 'production') {
+  app.use(logger());
+  app.use(errorHandler); 
+  // db = mongoose.connect('mongodb://localhost/nodepad-production');
+};
 
-function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+if (app.get('env') === 'test') {
+  app.use(errorHandler({ dumpExceptions: true, showStack: true }));
+  // db = mongoose.connect('mongodb://localhost/nodepad-test');
+};
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+//create server
+var server = http.createServer(app).listen(app.get('port'), function(){
+  log.info('-> Express server listening on port ' + config.get('port'));
+});
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-}
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  log.info('Express server listening on port ' + config.get("port"));
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-
-}
 
 module.exports = server;
