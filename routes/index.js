@@ -3,11 +3,10 @@ module.exports = function(app){
   app.get('/', require('./frontpage').get);
 // @TODO fix routes
   // Index
-  app.get('/documents', require('./documents').get);
+  app.get('/documents/:format?', require('./documents').get);
 
   // Create
-  app.post('/documents.:format?', function(req, res) {
-  });
+  app.post('/documents/:format?', require('./documents').post);
 
   // Show
   app.get('/documents/:id.:format?', function(req, res) {

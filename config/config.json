@@ -1,7 +1,13 @@
 {
   "port": 3000,
   "mongoose": {
-    "uri": "mongodb://localhost:27017/node_notepad",
+    "uri": {
+      "env": {
+        "development": "mongodb://localhost:27017/node_notepad",
+        "test": "mongodb://localhost:27017/node_notepad_test",
+        "production": "mongodb://localhost:27017/node_notepad_production"
+      }
+    },
     "options": {
       "useNewUrlParser": true,
       "useUnifiedTopology": true,

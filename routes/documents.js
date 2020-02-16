@@ -1,5 +1,4 @@
-var Document = require('../models/models').Document;
-
+var Document = require('../models/documents').Document;
 var mongoose = require('../libs/mongoose');
 
 exports.get = function(req, res){
@@ -9,3 +8,10 @@ exports.get = function(req, res){
   });
 };
 
+exports.post = function(req, res){
+  var document = new Document(req.body['document']);
+  document.save(function(err, document){
+    if (err) return console.log(err);
+    res.send(document);
+  });
+};

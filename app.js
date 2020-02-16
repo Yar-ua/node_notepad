@@ -18,7 +18,6 @@ var db = require('./libs/mongoose');
 var app = express();
 
 // engine setup configure
-
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(logger('dev'));
@@ -36,18 +35,15 @@ require('./routes')(app);
 if (app.get('env') === 'development') {
   app.use(logger(':method :url :status :response-time ms'));
   app.use(errorHandler({ dumpExceptions: true, showStack: true }));
-  // db = mongoose.connect('mongodb://localhost/nodepad-development');
 };
 
 if (app.get('env') === 'production') {
   app.use(logger());
   app.use(errorHandler); 
-  // db = mongoose.connect('mongodb://localhost/nodepad-production');
 };
 
 if (app.get('env') === 'test') {
   app.use(errorHandler({ dumpExceptions: true, showStack: true }));
-  // db = mongoose.connect('mongodb://localhost/nodepad-test');
 };
 
 //create server
